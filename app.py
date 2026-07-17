@@ -1,6 +1,6 @@
 from flask import Flask, render_template,request,session,redirect,send_file
 import sqlite3
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 
 app = Flask(__name__)
 app.secret_key = "LR2026"
@@ -266,6 +266,9 @@ def inventario():
     </a>
     <a href="/exportar_excel">
         <button>📊 Exportar Excel</button>
+    </a>
+    <a href="/restaurar_excel">
+        <button>📥 Restaurar Excel</button>
     </a>
 </td>
 </tr>
@@ -626,5 +629,67 @@ def exportar_excel():
         archivo,
         as_attachment=True
     )
+
+@app.route("/restaurar_excel", methods=["GET", "POST"])
+def restaurar_excel():
+
+    if request.method == "POST":
+
+        archivo = request.files["archivo"]
+
+        wb = load_workbook(archivo)
+        ws = wb.active
+
+        conexion = sqlite3.connect("inventario.db")
+        cursor = conexion.cursor()
+
+        cursor.execute("DELETE FROM productos")
+
+        for fila in ws.iter_rows(min_row=2, values_only=True):
+
+            id_producto, nombre, marca, cantidad, costo, precio = fila
+
+            cursor.execute("""
+                INSERT INTO productos
+                (id, nombre, marca, cantidad, costo, precio)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+                id_producto,
+                nombre,
+                marca,
+                cantidad,
+                costo,
+                precio
+            ))
+
+        conexion.commit()
+        conexion.close()
+
+        return redirect("/inventario")
+
+    return """
+    <html>
+    <head>
+        <title>Restaurar Inventario</title>
+    </head>
+    <body>
+
+        <h2>📥 Restaurar Inventario</h2>
+
+        <form method="POST" enctype="multipart/form-data">
+
+            <input type="file" name="archivo" required>
+
+            <br><br>
+
+            <button type="submit">
+                Restaurar
+            </button>
+
+        </form>
+
+    </body>
+    </html>
+    """
 if __name__ == "__main__":
     app.run(debug=True)
