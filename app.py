@@ -390,7 +390,7 @@ def entrada():
 
         <body>
 
-        <h1>⬆️ Registrar entrada</h1>
+        <h1>⬆️ Producto resurtido</h1>
 
         <a href="/">
             <button>🏠 Menú principal</button>
@@ -438,7 +438,7 @@ def entrada():
     conexion.close()
 
     pagina = """
-    <h1>Registrar entrada</h1>
+    <h1>Producto resurtido</h1>
 
     <form method="POST">
 
@@ -542,7 +542,7 @@ def salida():
 
     <body>
 
-    <h1>⬇️ Registrar salida</h1>
+    <h1>⬇️ Ventas</h1>
 
     <a href="/">
         <button>🏠 Menú principal</button>
@@ -576,7 +576,7 @@ def salida():
     <br><br>
 
     <button type="submit">
-        ⬇ Registrar salida
+        ⬇ Ventas
     </button>
 
     </form>
