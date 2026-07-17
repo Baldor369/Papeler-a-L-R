@@ -364,14 +364,27 @@ def entrada():
 
     if request.method == "POST":
 
-        id_producto = request.form["id_producto"]
+        nombre = request.form["nombre"]
         cantidad = request.form["cantidad"]
 
         conexion = sqlite3.connect("inventario.db")
         cursor = conexion.cursor()
 
         cursor.execute(
-        """
+        "SELECT id FROM productos WHERE nombre= ?",
+        (nombre,)
+        )
+
+        resultado = cursor.fetchone()
+
+        if resultado:
+            id_producto = resultado[0]
+        else:
+            conexion.close()
+            return "<h1>Producto no encontrado</h1>"
+
+        cursor.execute(
+            """
         UPDATE productos
         SET cantidad = cantidad + ?
         WHERE id = ?
@@ -390,7 +403,7 @@ def entrada():
 
         <body>
 
-        <h1>⬆️ Producto resurtido</h1>
+        <h1>Producto resurtido</h1>
 
         <a href="/">
             <button>🏠 Menú principal</button>
@@ -402,8 +415,10 @@ def entrada():
 
         <form method="POST">
 
-        Producto (ID):
-        <input type="number" name="id_producto">
+        <input list="productos" name="nombre">
+        <datalist id="productos">
+        
+        </datalist>
 
         <br><br>
 
@@ -443,19 +458,18 @@ def entrada():
     <form method="POST">
 
         Producto:
-        <select name="id_producto">
+        <input list="productos" name="nombre">
+        <datalist id="productos">
     """
 
     for producto in productos:
 
         pagina += f"""
-        <option value="{producto[0]}">
-            {producto[1]}
-        </option>
+        <option value="{producto[1]}">
         """
 
     pagina += """
-        </select>
+        </datalist>
 
         <br><br>
 
