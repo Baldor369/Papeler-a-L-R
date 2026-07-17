@@ -413,7 +413,7 @@ def entrada():
         <br><br>
 
         <button type="submit">
-            ⬆️ Registrar entrada
+            ⬆️ Producto resurtido
         </button>
 
         </form>
@@ -576,7 +576,7 @@ def salida():
     <br><br>
 
     <button type="submit">
-        ⬇ Ventas
+        ⬇️ Ventas
     </button>
 
     </form>
