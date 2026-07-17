@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>L&R Inventario</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='estilo.css') }}">
+</head>
+
+<body>
+<center>
+    <img src="/static/Logo%20LR.jpeg" width="280">
+</center>
+    <h1>Base de datos L&R</h1>
+
+    <h2>Menú principal</h2>
+
+  <div class="menu">
+
+    <a href="/inventario" class="boton-menu">
+        📋 Ver inventario
+    </a>
+
+    <a href="/agregar" class="boton-menu">
+        📦 Agregar producto
+    </a>
+
+    <a href="/entrada" class="boton-menu">
+        ⬇️ Registrar entrada
+    </a>
+
+    <a href="/salida" class="boton-menu">
+        ⬆️ Registrar salida
+    </a>
+
+    <a href="/logout" class="boton-salir">
+        🚪 Cerrar sesión
+    </a>
+
+</div>
+
+</body>
+</html>
