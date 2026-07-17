@@ -1,5 +1,6 @@
-from flask import Flask, render_template,request,session,redirect
+from flask import Flask, render_template,request,session,redirect,send_file
 import sqlite3
+from openpyxl import Workbook
 
 app = Flask(__name__)
 app.secret_key = "LR2026"
@@ -262,6 +263,9 @@ def inventario():
     <td>
     <a href="/eliminar/{producto[0]}">
         <button class="rosa">Eliminar</button>
+    </a>
+    <a href="/exportar_excel">
+        <button>📊 Exportar Excel</button>
     </a>
 </td>
 </tr>
@@ -581,5 +585,46 @@ def salida():
     """
 
     return pagina
+
+@app.route("/exportar_excel")
+def exportar_excel():
+
+    conexion = sqlite3.connect("inventario.db")
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+        SELECT id, nombre, marca, cantidad, costo, precio
+        FROM productos
+    """)
+
+    productos = cursor.fetchall()
+
+    conexion.close()
+
+    wb = Workbook()
+    ws = wb.active
+
+    ws.title = "Inventario"
+
+    ws.append([
+        "ID",
+        "Nombre",
+        "Marca",
+        "Cantidad",
+        "Costo",
+        "Precio"
+    ])
+
+    for producto in productos:
+        ws.append(producto)
+
+    archivo = "inventario_respaldo.xlsx"
+
+    wb.save(archivo)
+
+    return send_file(
+        archivo,
+        as_attachment=True
+    )
 if __name__ == "__main__":
     app.run(debug=True)
