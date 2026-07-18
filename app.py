@@ -550,6 +550,9 @@ def salida():
         producto = request.form["nombre"]
         nombre, marca = producto.split(" | ")
         cantidad = request.form["cantidad"]
+        
+        conexion = sqlite3.connect("inventario.db")
+        cursor = conexion.cursor()
 
         cursor.execute(
             "SELECT id FROM productos WHERE nombre = ? AND marca = ?",
