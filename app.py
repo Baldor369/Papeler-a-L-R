@@ -184,7 +184,91 @@ def eliminar(id):
         <button>Volver</button>
     </a>
     """
+@app.route("/editar/<int:id>", methods=["GET", "POST"])
+def editar(id):
 
+    if request.method == "POST":
+
+        nombre = request.form["nombre"]
+        marca = request.form["marca"]
+        costo = request.form["costo"]
+        precio = request.form["precio"]
+
+        conexion = sqlite3.connect("inventario.db")
+        cursor = conexion.cursor()
+
+        cursor.execute("""
+        UPDATE productos
+        SET nombre = ?,
+            marca = ?,
+            costo = ?,
+            precio = ?
+        WHERE id = ?
+        """, (nombre, marca, costo, precio, id))
+
+        conexion.commit()
+        conexion.close()
+
+        return redirect("/inventario")
+        
+    conexion = sqlite3.connect("inventario.db")
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        "SELECT * FROM productos WHERE id = ?",
+        (id,)
+    )
+
+    producto = cursor.fetchone()
+
+    conexion.close()
+
+    pagina = f"""
+    <html>
+
+    <head>
+    <link rel="stylesheet" href="/static/estilo.css">
+    </head>
+
+    <body>
+
+    <h1>✏️ Editar producto</h1>
+
+    <div class="formulario">
+
+    <form method="POST">
+
+        Nombre:
+        <input type="text" name="nombre" value="{producto[1]}">
+
+        <br><br>
+
+        Marca:
+        <input type="text" name="marca" value="{producto[2]}">
+
+        <br><br>
+
+        Costo:
+        <input type="number" step="0.01" name="costo" value="{producto[4]}">
+
+        <br><br>
+
+        Precio:
+       <input type="number" step="0.01" name="precio" value="{producto[5]}">
+        <br><br>
+
+        <button>Guardar cambios</button>
+
+    </form>
+
+    </div>
+
+    </body>
+
+    </html>
+    """
+
+    return pagina
 @app.route("/inventario")
 def inventario():
 
@@ -261,6 +345,11 @@ def inventario():
     <td>{producto[4]}</td>
     <td>{producto[5]}</td>
     <td>
+
+    <a href="/editar/{producto[0]}">
+        <button>✏️ Editar</button>
+    </a>
+
     <a href="/eliminar/{producto[0]}">
         <button class="rosa">Eliminar</button>
     </a>
@@ -364,15 +453,16 @@ def entrada():
 
     if request.method == "POST":
 
-        nombre = request.form["nombre"]
+        producto = request.form["nombre"]
+        nombre, marca = producto.split(" | ")
         cantidad = request.form["cantidad"]
 
         conexion = sqlite3.connect("inventario.db")
         cursor = conexion.cursor()
 
         cursor.execute(
-        "SELECT id FROM productos WHERE nombre= ?",
-        (nombre,)
+        "SELECT id FROM productos WHERE nombre= ? AND marca= ?",
+        (nombre, marca)
         )
 
         resultado = cursor.fetchone()
@@ -394,65 +484,26 @@ def entrada():
 
         conexion.commit()
         conexion.close()     
-    return """
-        <html>
-
-        <head>
-        <link rel="stylesheet" href="/static/estilo.css">
-        </head>
-
-        <body>
-
-        <h1>Producto resurtido</h1>
-
-        <a href="/">
-            <button>🏠 Menú principal</button>
-        </a>
-
-        <br><br>
-
-        <div class="formulario">
-
-        <form method="POST">
-
-        <input list="productos" name="nombre">
-        <datalist id="productos">
-        
-        </datalist>
-
-        <br><br>
-
-        Cantidad:
-        <input type="number" name="cantidad">
-
-        <br><br>
-
-        <button type="submit">
-            ⬆️ Producto resurtido
-        </button>
-
-        </form>
-
-        </div>
-
-        </body>
-        </html>
-        <h1>Entrada registrada</h1>
-         <a href='/inventario'>
-        <button>Volver al inventario</button>
-         </a>
-         """
+        return redirect("/inventario")
 
     conexion = sqlite3.connect("inventario.db")
     cursor = conexion.cursor()
 
-    cursor.execute("SELECT id, nombre FROM productos")
+    cursor.execute("SELECT id, nombre, marca FROM productos")
 
     productos = cursor.fetchall()
 
     conexion.close()
 
     pagina = """
+
+    <html>
+<head>
+<link rel="stylesheet" href="/static/estilo.css">
+</head>
+<body>
+
+<div class="formulario">
     <h1>Producto resurtido</h1>
 
     <form method="POST">
@@ -465,40 +516,44 @@ def entrada():
     for producto in productos:
 
         pagina += f"""
-        <option value="{producto[1]}">
+        <option value="{producto[1]} | {producto[2]}"></option>
         """
-
     pagina += """
-        </datalist>
+    </datalist>
 
-        <br><br>
+    <br><br>
 
-        Cantidad:
-        <input type="number" name="cantidad">
+    Cantidad:
+    <input type="number" name="cantidad">
 
-        <br><br>
+    <br><br>
 
-        <button type="submit">
-            Registrar
-        </button>
+    <button type="submit">
+        Registrar
+    </button>
 
     </form>
+
+    </div>
+
+    </body>
+    </html>
     """
 
+    print("ENTRE A LA NUEVA PAGINA DE RESURTIDO")
     return pagina
 @app.route("/salida", methods=["GET","POST"])
 def salida():
     print(request.method)
     if request.method == "POST":
 
-        nombre = request.form["nombre"]
+        producto = request.form["nombre"]
+        nombre, marca = producto.split(" | ")
         cantidad = request.form["cantidad"]
 
-        conexion = sqlite3.connect("inventario.db")
-        cursor = conexion.cursor()
         cursor.execute(
-        "SELECT id FROM productos WHERE nombre = ?",
-        (nombre,)
+            "SELECT id FROM productos WHERE nombre = ? AND marca = ?",
+            (nombre, marca)
         )
 
         resultado = cursor.fetchone()
@@ -541,7 +596,7 @@ def salida():
     conexion = sqlite3.connect("inventario.db")
     cursor = conexion.cursor()
 
-    cursor.execute("SELECT id, nombre FROM productos")
+    cursor.execute("SELECT id, nombre, marca FROM productos")
 
     productos = cursor.fetchall()
 
@@ -573,8 +628,8 @@ def salida():
     <datalist id="productos">
     """
     for producto in productos:
-        pagina +=f"""
-        <option value="{producto[1]}">
+        pagina += f"""
+        <option value="{producto[1]} | {producto[2]}"></option>
         """
 
 
